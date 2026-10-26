@@ -69,11 +69,14 @@ table.sm{width:100%;border-collapse:collapse;font-size:13px}
 [hidden]{display:none!important}
 .tp{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:14px}
 .tp button{border:1px solid var(--acc);background:none;color:var(--acc);padding:5px 12px;border-radius:16px;cursor:pointer;font:inherit}
+.unl .pw{padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;width:130px}
+.unl .ub,.lb{border:1px solid var(--acc);background:none;color:var(--acc);padding:4px 10px;border-radius:14px;cursor:pointer;font:inherit}
+.pe{color:var(--red);font-size:12px}
 </style></head><body>
 <h1>FSA Wall Panel Inspection Plan</h1>
 <p class="sub">Project CHB2A – Dolphin · Ref. drawing A-FSA-3000-2.1 (Building Elevations, Rev. R5 V7, Issued for Construction)</p>
 <div id="main">
-<div class="tp"><span>Total progress: <b id="tpv"></b></span><button id="rb">Progress report ›</button></div>
+<div class="tp"><span>Total progress: <b id="tpv"></b></span><span id="lkm"></span><span id="sy" class="note"></span><button id="rb">Progress report ›</button></div>
 <div class="card"><div class="stats" id="stats"></div></div>
 <div class="card">
 <h2>Inspection Sequence</h2>
@@ -90,7 +93,7 @@ table.sm{width:100%;border-collapse:collapse;font-size:13px}
 <div id="sumbody"></div>
 <p class="note">Progress = checks completed ÷ total scope. Scope = Support Wall (columns) + Installation Wall Panel + Finishing, counted by their check dates. A panel’s support wall is not counted twice.</p></div>
 <div class="card"><h2>S-Curve (cumulative progress)</h2>
-<div class="pl"><label>Plan start <input type="date" id="ps"></label><label>Plan finish <input type="date" id="pf"></label></div>
+<div class="pl"><label>Plan start <input type="date" id="ps"></label><label>Plan finish <input type="date" id="pf"></label><span id="lkr"></span></div>
 <div id="scsvg"></div>
 <div class="legend"><span><i class="ln"></i>Actual</span><span><i class="ln" style="border-top-style:dashed;border-color:#e0a100"></i>Plan (S-shaped, shown when plan start and finish are set)</span></div></div>
 </div>
@@ -145,17 +148,17 @@ function render(){
  document.getElementById("steps").innerHTML=b;
  sumr();chart();
 }
-function card(d,k,t,dis){var on=d.c[k],lk=dis&&!on;return '<div class="sc'+(on?" on":"")+'"><input type="checkbox" data-s="'+k+'"'+(on?" checked":"")+(lk?" disabled":"")+'><div><b>'+t+'</b>'+(lk?'<div class="m">Complete the previous step first</div>':'<div class="m">Checked date: <input type="date" data-dt="'+k+'" value="'+(d.t[k]||"")+'"'+(on?"":" disabled")+'></div>')+'</div></div>'}
+function card(d,k,t,dis){var on=d.c[k],pre=dis&&!on,off=pre||!UNL;return '<div class="sc'+(on?" on":"")+'"><input type="checkbox" data-s="'+k+'"'+(on?" checked":"")+(off?" disabled":"")+'><div><b>'+t+'</b>'+(pre?'<div class="m">Complete the previous step first</div>':'<div class="m">Checked date: <input type="date" data-dt="'+k+'" value="'+(d.t[k]||"")+'"'+(on&&UNL?"":" disabled")+'></div>')+'</div></div>'}
 function fill(id,mode){
  var d=g(id),bd=document.getElementById("dbody"),h="";
  if(mode=="col"){h=card(d,"col","Support Wall");document.getElementById("dt").textContent="Support Wall – Column "+id}
- else{h='<div class="info"><div><label>Inspector</label><input data-f="who" value="'+(d.i.who||"")+'"></div><div><label>Remarks / NCR reference</label><textarea rows="2" data-f="rem">'+(d.i.rem||"")+'</textarea></div></div>';
+ else{h='<div class="info"><div><label>Inspector</label><input data-f="who" value="'+(d.i.who||"")+'"'+(UNL?"":" disabled")+'></div><div><label>Remarks / NCR reference</label><textarea rows="2" data-f="rem"'+(UNL?"":" disabled")+'>'+(d.i.rem||"")+'</textarea></div></div>';
   var n=+id.split("-")[1],q=id[0],L="C-"+q+"-"+pad(n),R="C-"+q+"-"+pad(n+1),sp=sup(id),ds=sp?(S[L].t.col>S[R].t.col?S[L].t.col:S[R].t.col):"";
   var cs=function(c){return c+": "+(done(c,"col")?"checked "+fmt(S[c].t.col):"pending")};
   h+='<div class="sc'+(sp?" on":"")+'"><input type="checkbox" disabled'+(sp?" checked":"")+'><div><b>'+STEPS[0]+'</b><div class="m">'+(sp?"Checked date: "+fmt(ds):"Waiting for support wall on both sides")+'</div><div class="m">Left '+cs(L)+" · Right "+cs(R)+'</div></div></div>';
   h+=card(d,1,STEPS[1],!sp)+card(d,2,STEPS[2],!eff(id,1));
   var el=ELEVS.filter(function(e){return e.k==id[0]})[0];document.getElementById("dt").textContent="Panel "+id+" – "+el.t}
- bd.innerHTML=h;bd.dataset.id=id;bd.dataset.mode=mode;
+ bd.innerHTML=(UNL?"":'<div class="note" style="margin:0 0 10px;font-size:13px">🔒 Locked – enter the passcode to check. '+lockForm()+'</div>')+h;bd.dataset.id=id;bd.dataset.mode=mode;
 }
 function open(id,mode){fill(id,mode);document.getElementById("dlg").showModal()}
 document.addEventListener("click",function(e){
@@ -200,23 +203,64 @@ function chart(){
  document.getElementById("scsvg").innerHTML=s;
 }
 document.addEventListener("click",function(e){var b=e.target.closest("[data-per]");if(b){per=b.dataset.per;sumr()}});
-document.getElementById("ps").onchange=function(){S._plan=S._plan||{};S._plan.a=this.value;save();chart()};
-document.getElementById("pf").onchange=function(){S._plan=S._plan||{};S._plan.b=this.value;save();chart()};
+document.getElementById("ps").onchange=function(){if(!UNL)return;S._plan=S._plan||{};S._plan.a=this.value;savePlan();chart()};
+document.getElementById("pf").onchange=function(){if(!UNL)return;S._plan=S._plan||{};S._plan.b=this.value;savePlan();chart()};
 (function(){var p=S._plan||{};document.getElementById("ps").value=p.a||"";document.getElementById("pf").value=p.b||""})();
 function go(r){document.getElementById("main").hidden=r;document.getElementById("rep").hidden=!r;try{location.hash=r?"report":""}catch(e){}window.scrollTo(0,0)}
 document.getElementById("rb").onclick=function(){go(true)};
 document.getElementById("bk").onclick=function(){go(false)};
 window.onhashchange=function(){go(location.hash=="#report")};
 if(location.hash=="#report")go(true);
+var PH="1b305f66d076cbbc3e23c8815e08e7d0f967321edb7f04c1afec13f95bedfcc1",UNL=false;try{UNL=sessionStorage.getItem("wp-unl")=="1"}catch(e){}
+function sha(t){if(window.crypto&&crypto.subtle&&window.TextEncoder)return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,"0")}).join("")});return Promise.resolve("")}
+function lockForm(){return '<span class="unl"><input type="password" class="pw" placeholder="Passcode" autocomplete="off"><button class="ub">Unlock</button> <span class="pe"></span></span>'}
+function updateLocks(){var h=UNL?'🔓 Unlocked <button class="lb">Lock</button>':'🔒 '+lockForm();document.getElementById("lkm").innerHTML=h;document.getElementById("lkr").innerHTML=h;document.getElementById("ps").disabled=!UNL;document.getElementById("pf").disabled=!UNL}
+function afterLock(){updateLocks();var dl=document.getElementById("dlg");if(dl.open)fill(bd.dataset.id,bd.dataset.mode)}
+document.addEventListener("click",function(e){
+ var u=e.target.closest(".ub");
+ if(u){var f=u.closest(".unl");sha(f.querySelector(".pw").value).then(function(h){if(h==PH){UNL=true;try{sessionStorage.setItem("wp-unl","1")}catch(x){}afterLock()}else f.querySelector(".pe").textContent="Wrong passcode"})}
+ if(e.target.closest(".lb")){UNL=false;try{sessionStorage.removeItem("wp-unl")}catch(x){}afterLock()}});
+document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target.classList&&e.target.classList.contains("pw"))e.target.closest(".unl").querySelector(".ub").click()});
+var DB=null,WR=true,Q={},first=true;
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function sy(t){document.getElementById("sy").textContent=t}
+function werr(e){if(e&&e.code=="invalid_argument"){WR=false;sy("● Read-only (no edit access)")}else sy("● Sync error – saved on this device")}
+function persist(id){save();if(!DB||!WR)return;var ref=DB.collection("items").doc(id);Q[id]=(Q[id]||Promise.resolve()).then(function(){return ref.set(clone(S[id]||{c:{},t:{},i:{}}))}).catch(werr)}
+function savePlan(){save();if(DB&&WR)DB.doc("meta/plan").set(clone(S._plan||{})).catch(werr)}
+function initSync(){
+ if(!window.claude||!claude.use){sy("● This device only");return}
+ claude.use("db").then(function(d){
+  if(!d){sy("● This device only");return}
+  DB=d;sy("● Syncing…");
+  d.collection("items").onSnapshot(function(snap){
+   if(first&&snap.metadata.fromCache)return;
+   var cd=document.getElementById("dbody").dataset.id,touch=false;
+   if(first){first=false;var ids={},mig=false;snap.docs.forEach(function(x){ids[x.id]=1});
+    try{mig=localStorage.getItem(key+"-m")=="1"}catch(e){}
+    if(!mig){Object.keys(S).forEach(function(id){if(id!="_plan"&&!ids[id])persist(id)});try{localStorage.setItem(key+"-m","1")}catch(e){}}
+    else{var pl=S._plan;S={};if(pl)S._plan=pl}
+    snap.docs.forEach(function(x){S[x.id]=clone(x.data());if(x.id==cd)touch=true})}
+   else snap.docChanges().forEach(function(ch){if(ch.type=="removed")delete S[ch.doc.id];else S[ch.doc.id]=clone(ch.doc.data());if(ch.doc.id==cd)touch=true});
+   save();render();
+   var ae=document.activeElement,dl=document.getElementById("dlg");
+   if(touch&&dl.open&&!snap.metadata.hasPendingWrites&&!(ae&&ae.dataset&&ae.dataset.f))fill(cd,bd.dataset.mode);
+   sy("● Synced")},function(){sy("● Sync error – saved on this device")});
+  d.doc("meta/plan").onSnapshot(function(x){if(x.exists){S._plan=clone(x.data());document.getElementById("ps").value=S._plan.a||"";document.getElementById("pf").value=S._plan.b||"";save();chart()}},function(){});
+ }).catch(function(){sy("● This device only")})
+}
 var bd=document.getElementById("dbody");
-bd.addEventListener("change",function(e){var id=bd.dataset.id,d=g(id),t=e.target;
+bd.addEventListener("change",function(e){if(!UNL)return;var id=bd.dataset.id,d=g(id),t=e.target;
  if(t.dataset.s!==undefined){var k=t.dataset.s;if(t.checked){d.c[k]=1;if(!d.t[k])d.t[k]=today()}else{delete d.c[k];delete d.t[k]}}
  else if(t.dataset.dt!==undefined)d.t[t.dataset.dt]=t.value||today();
  else return;
- save();render();fill(id,bd.dataset.mode)});
-bd.addEventListener("input",function(e){var t=e.target;if(t.dataset.f){g(bd.dataset.id).i[t.dataset.f]=t.value;save()}});
+ persist(id);render();fill(id,bd.dataset.mode)});
+var tm=0;bd.addEventListener("input",function(e){var t=e.target;if(UNL&&t.dataset.f){var id=bd.dataset.id;g(id).i[t.dataset.f]=t.value;save();clearTimeout(tm);tm=setTimeout(function(){persist(id)},700)}});
 document.getElementById("cl").onclick=function(){document.getElementById("dlg").close()};
-document.getElementById("rst").onclick=function(){if(confirm("Clear all inspection records?")){S={};save();document.getElementById("ps").value="";document.getElementById("pf").value="";render()}};
+var rt=0;
+document.getElementById("rst").onclick=function(){var b=this;if(!UNL){b.textContent="Unlock first";setTimeout(function(){b.textContent="Reset all"},2000);return}
+ if(!rt){b.textContent="Click again to confirm";rt=setTimeout(function(){rt=0;b.textContent="Reset all"},4000);return}
+ clearTimeout(rt);rt=0;b.textContent="Reset all";var ks=Object.keys(S).filter(function(k){return k!="_plan"});S={};save();document.getElementById("ps").value="";document.getElementById("pf").value="";
+ if(DB&&WR){ks.forEach(function(k){DB.collection("items").doc(k).delete().catch(werr)});DB.doc("meta/plan").delete().catch(werr)}render()};
 document.getElementById("th").onclick=function(){var r=document.documentElement,d=r.dataset.theme;var dark=d?d=="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=dark?"light":"dark"};
-render();
+updateLocks();render();initSync();
 </script></body></html>
