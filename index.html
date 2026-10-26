@@ -76,7 +76,7 @@ table.sm{width:100%;border-collapse:collapse;font-size:13px}
 <h1>FSA Wall Panel Inspection Plan</h1>
 <p class="sub">Project CHB2A – Dolphin · Ref. drawing A-FSA-3000-2.1 (Building Elevations, Rev. R5 V7, Issued for Construction)</p>
 <div id="main">
-<div class="tp"><span>Total progress: <b id="tpv"></b></span><span id="lkm"></span><span id="sy" class="note"></span><button id="rb">Progress report ›</button></div>
+<div class="tp"><span>Total progress: <b id="tpv"></b></span><span id="lkm"></span><span id="sy" class="note"></span><span id="fbs"></span><button id="rb">Progress report ›</button></div>
 <div class="card"><div class="stats" id="stats"></div></div>
 <div class="card">
 <h2>Inspection Sequence</h2>
@@ -221,19 +221,46 @@ document.addEventListener("click",function(e){
  if(u){var f=u.closest(".unl");sha(f.querySelector(".pw").value).then(function(h){if(h==PH){UNL=true;try{sessionStorage.setItem("wp-unl","1")}catch(x){}afterLock()}else f.querySelector(".pe").textContent="Wrong passcode"})}
  if(e.target.closest(".lb")){UNL=false;try{sessionStorage.removeItem("wp-unl")}catch(x){}afterLock()}});
 document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target.classList&&e.target.classList.contains("pw"))e.target.closest(".unl").querySelector(".ub").click()});
+/* ONLINE SYNC FOR SELF-HOSTED COPIES: paste your Firebase Realtime Database URL between the quotes, e.g. "https://my-project-default-rtdb.asia-southeast1.firebasedatabase.app" */
+var FB_URL="https://meng101-fc273-default-rtdb.asia-southeast1.firebasedatabase.app/",MODE="local",busy=0,lastW=0,lastRaw="",fbFirst=true;
+try{if(!FB_URL)FB_URL=localStorage.getItem("wp-fb")||""}catch(e){}
+function fbSetup(){document.getElementById("fbs").innerHTML='<button class="lb" id="fbb">Set up online sync</button>'}
+document.addEventListener("click",function(e){
+ if(e.target.id=="fbb"){if(!UNL){sy("● Unlock first, then set up online sync");return}document.getElementById("fbs").innerHTML='<input id="fbu" placeholder="https://…firebasedatabase.app" style="width:260px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit"> <button class="lb" id="fbv">Save</button>'}
+ if(e.target.id=="fbv"){var u=document.getElementById("fbu").value.trim();if(/^https:\/\/.+/.test(u)){try{localStorage.setItem("wp-fb",u)}catch(x){}location.reload()}else sy("● Enter a valid https:// URL")}});
+function norm(d){d=d||{};return{c:d.c||{},t:d.t||{},i:d.i||{}}}
+function fbw(path,method,data){busy++;return fetch(FB_URL+"/wp"+(path?"/"+path:"")+".json",{method:method,headers:{"Content-Type":"application/json"},body:data===undefined?undefined:JSON.stringify(data)}).then(function(r){if(!r.ok)throw 0;sy("● Synced (online)")}).catch(function(){sy("● Sync error – saved on this device")}).then(function(){busy--;lastW=Date.now()})}
+function fbPull(){
+ if(busy>0||Date.now()-lastW<2500)return;
+ fetch(FB_URL+"/wp.json").then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+  j=j||{};var raw=JSON.stringify(j),it=j.items||{},wasFirst=fbFirst;
+  if(fbFirst){fbFirst=false;var mig=false;try{mig=localStorage.getItem(key+"-m")=="1"}catch(e){}
+   if(!mig){Object.keys(S).forEach(function(id){if(id!="_plan"&&!it[id])persist(id)});try{localStorage.setItem(key+"-m","1")}catch(e){}}}
+  sy("● Synced (online)");
+  if(raw==lastRaw)return;lastRaw=raw;
+  var n={};Object.keys(it).forEach(function(id){n[id]=norm(it[id])});
+  if(wasFirst)Object.keys(S).forEach(function(id){if(id!="_plan"&&!n[id])n[id]=S[id]});
+  S=n;if(j.plan)S._plan=j.plan;
+  document.getElementById("ps").value=(S._plan||{}).a||"";document.getElementById("pf").value=(S._plan||{}).b||"";
+  save();render();
+  var ae=document.activeElement,dl=document.getElementById("dlg");
+  if(dl.open&&!(ae&&ae.dataset&&ae.dataset.f))fill(bd.dataset.id,bd.dataset.mode);
+ }).catch(function(){sy("● Sync error – saved on this device")})
+}
+function initFB(){FB_URL=FB_URL.replace(/\/+$/,"");MODE="fb";sy("● Syncing…");fbPull();setInterval(fbPull,4000)}
 var DB=null,WR=true,Q={},first=true;
 function clone(o){return JSON.parse(JSON.stringify(o))}
 function sy(t){document.getElementById("sy").textContent=t}
 function werr(e){if(e&&e.code=="invalid_argument"){WR=false;sy("● Read-only (no edit access)")}else sy("● Sync error – saved on this device")}
-function persist(id){save();if(!DB||!WR)return;var ref=DB.collection("items").doc(id);Q[id]=(Q[id]||Promise.resolve()).then(function(){return ref.set(clone(S[id]||{c:{},t:{},i:{}}))}).catch(werr)}
-function savePlan(){save();if(DB&&WR)DB.doc("meta/plan").set(clone(S._plan||{})).catch(werr)}
+function persist(id){save();if(MODE=="fb"){fbw("items/"+id,"PUT",clone(S[id]||{c:{},t:{},i:{}}));return}if(!DB||!WR)return;var ref=DB.collection("items").doc(id);Q[id]=(Q[id]||Promise.resolve()).then(function(){return ref.set(clone(S[id]||{c:{},t:{},i:{}}))}).catch(werr)}
+function savePlan(){save();if(MODE=="fb"){fbw("plan","PUT",clone(S._plan||{}));return}if(DB&&WR)DB.doc("meta/plan").set(clone(S._plan||{})).catch(werr)}
 function initSync(){
- if(!window.claude||!claude.use){sy("● This device only");return}
+ if(!window.claude||!claude.use){if(FB_URL)initFB();else{sy("● This device only");fbSetup()};return}
  claude.use("db").then(function(d){
-  if(!d){sy("● This device only");return}
-  DB=d;sy("● Syncing…");
+  if(!d){if(FB_URL)initFB();else{sy("● This device only");fbSetup()};return}
+  DB=d;MODE="db";sy("● Syncing…");
   d.collection("items").onSnapshot(function(snap){
-   if(first&&snap.metadata.fromCache)return;
+   if(first&&snap.metadata.fromCache){snap.docs.forEach(function(x){S[x.id]=clone(x.data())});save();render();sy("● Synced");return}
    var cd=document.getElementById("dbody").dataset.id,touch=false;
    if(first){first=false;var ids={},mig=false;snap.docs.forEach(function(x){ids[x.id]=1});
     try{mig=localStorage.getItem(key+"-m")=="1"}catch(e){}
@@ -244,9 +271,9 @@ function initSync(){
    save();render();
    var ae=document.activeElement,dl=document.getElementById("dlg");
    if(touch&&dl.open&&!snap.metadata.hasPendingWrites&&!(ae&&ae.dataset&&ae.dataset.f))fill(cd,bd.dataset.mode);
-   sy("● Synced")},function(){sy("● Sync error – saved on this device")});
+   sy("● Synced")},function(e){sy("● Sync error – "+((e&&e.message)||"saved on this device"))});
   d.doc("meta/plan").onSnapshot(function(x){if(x.exists){S._plan=clone(x.data());document.getElementById("ps").value=S._plan.a||"";document.getElementById("pf").value=S._plan.b||"";save();chart()}},function(){});
- }).catch(function(){sy("● This device only")})
+ }).catch(function(){if(FB_URL)initFB();else{sy("● This device only");fbSetup()}})
 }
 var bd=document.getElementById("dbody");
 bd.addEventListener("change",function(e){if(!UNL)return;var id=bd.dataset.id,d=g(id),t=e.target;
@@ -260,22 +287,7 @@ var rt=0;
 document.getElementById("rst").onclick=function(){var b=this;if(!UNL){b.textContent="Unlock first";setTimeout(function(){b.textContent="Reset all"},2000);return}
  if(!rt){b.textContent="Click again to confirm";rt=setTimeout(function(){rt=0;b.textContent="Reset all"},4000);return}
  clearTimeout(rt);rt=0;b.textContent="Reset all";var ks=Object.keys(S).filter(function(k){return k!="_plan"});S={};save();document.getElementById("ps").value="";document.getElementById("pf").value="";
- if(DB&&WR){ks.forEach(function(k){DB.collection("items").doc(k).delete().catch(werr)});DB.doc("meta/plan").delete().catch(werr)}render()};
+ if(DB&&WR){ks.forEach(function(k){DB.collection("items").doc(k).delete().catch(werr)});DB.doc("meta/plan").delete().catch(werr)}else if(MODE=="fb")fbw("","DELETE");render()};
 document.getElementById("th").onclick=function(){var r=document.documentElement,d=r.dataset.theme;var dark=d?d=="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=dark?"light":"dark"};
 updateLocks();render();initSync();
- /* ONLINE SYNC (Firebase Realtime Database, REST). Paste your database URL between the quotes, or use the Online sync button. */
-let FB_URL="https://meng101-fc273-default-rtdb.asia-southeast1.firebasedatabase.app/";
-FB_URL=FB_URL||S.fb||"";
-const fbu=()=>FB_URL.replace(/\/+$/,"");
-const setS=t=>{$("fbs").textContent=t};
-function touch(id){if(!fbu())return;S.u=S.u||{};const u=Date.now();S.u[id]=u;save();
- fetch(fbu()+"/grinding/p"+id+".json",{method:"PUT",body:JSON.stringify({s:S.starts[id],t:S.ticks[id].map(x=>x||""),u})}).then(()=>setS("● Online · synced "+new Date().toLocaleTimeString())).catch(()=>setS("○ Offline · will retry"))}
-async function pull(){if(!fbu())return;try{const r=await fetch(fbu()+"/grinding.json");const d=await r.json();S.u=S.u||{};let ch=false;
- if(!d){panels.forEach(p=>touch(p.id));return}
- for(const k in d){const id=+k.slice(1),v=d[k];if(v&&v.u>(S.u[id]||0)){S.starts[id]=v.s;S.ticks[id]=[0,1,2].map(i=>(v.t&&v.t[i])||null);S.u[id]=v.u;ch=true}}
- if(ch){save();draw();if(cur&&$("dlg").open)open(cur)}setS("● Online · synced "+new Date().toLocaleTimeString())}catch(e){setS("○ Offline · will retry")}}
-$("fb").onclick=()=>{const v=prompt("Paste your Firebase Realtime Database URL (e.g. https://your-project-default-rtdb.firebaseio.com). Leave empty to turn online sync off.",FB_URL||"");if(v===null)return;FB_URL=v.trim();S.fb=FB_URL;save();setS(FB_URL?"Connecting…":"Offline mode");pull()};
-if(fbu()){setS("Connecting…");pull()}
-setInterval(pull,5000);
-draw();
 </script></body></html>
