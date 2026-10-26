@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHB2A Dolphin – FSA Wall Panel Inspection Plan</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#1c2230;--mut:#5b6475;--line:#d6dae1;--acc:#1f4e8c;--ok:#2e9e5b;--pen:#9aa3b2;--red:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161d;--card:#1b212b;--ink:#e8ebf0;--mut:#9aa3b2;--line:#323a48;--acc:#6aa4ec;--pen:#5d6676;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161d;--card:#1b212b;--ink:#e8ebf0;--mut:#9aa3b2;--line:#323a48;--acc:#6aa4ec;--pen:#5d6676;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:16px}
+h1{font-size:20px;margin:0}h2{font-size:16px;margin:0 0 8px}
+.sub{color:var(--mut);margin:2px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ok);width:0}
+.steps,.tools{display:flex;flex-wrap:wrap;gap:8px}
+.steps{margin-bottom:10px}.tools{margin-top:8px}
+.steps button,.tools button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:16px;cursor:pointer;font:inherit}
+.steps button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--mut);font-size:12px;align-items:center}
+.d{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid #000}
+.s0{background:var(--pen)}.s2{background:var(--ok)}
+.sq{display:inline-block;width:10px;height:14px;border:1px solid #000;margin-right:4px;vertical-align:middle}
+.scroll{overflow-x:auto;padding-bottom:6px}
+.elev{min-width:1000px}
+.in{position:relative;margin:0 18px}
+.glr{position:relative;height:32px}
+.gb{position:absolute;top:2px;transform:translateX(-50%);width:28px;height:28px;border:2px solid var(--ink);border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.gll{position:absolute;left:0;right:0;top:32px;bottom:0;pointer-events:none;z-index:2}
+.gll i{position:absolute;top:0;bottom:0;border-left:2px dashed var(--ink);opacity:.8}
+.bays,.row,.pg{display:flex;gap:0}
+.bay{border-top:2px solid var(--mut);padding-top:2px;text-align:center;font-size:11px;color:var(--mut);margin-bottom:4px}
+.roof{height:30px;background:var(--line);border:2px solid #000;border-bottom:0;clip-path:polygon(1.5% 100%,4% 0,96% 0,98.5% 100%);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mut);margin-top:2px}
+.wall{position:relative}
+.gl{border-top:5px solid var(--ink);font-size:11px;color:var(--mut);padding-top:2px}
+.p{flex:1;height:150px;background:var(--red);border:2px solid #000;color:#fff;border-radius:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-start;gap:5px;align-items:center;padding:6px 2px;font-size:11px;font-weight:600;font-family:inherit}
+.p:hover,.p:focus-visible{outline:3px solid var(--acc);outline-offset:-3px}
+.dots{display:flex;gap:2px}.dots .d{margin:0;width:8px;height:8px}
+.dim{opacity:.35}
+.p.st1{background:#8d96a5}.p.st2{background:#f5c400;color:#111}.p.st3{background:#2f8fe0}
+.col{position:absolute;top:0;bottom:0;width:14px;transform:translateX(-50%);border:2px solid #000;background:#e6e9ee;cursor:pointer;padding:0;z-index:1}
+.col.ok{background:var(--ok)}
+.col:hover,.col:focus-visible{outline:3px solid var(--acc)}
+.note{color:var(--mut);font-size:12px;margin-top:6px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:min(520px,94vw);max-height:90vh;padding:0}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card)}
+.db{padding:12px 16px}
+.sc{display:flex;gap:12px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.sc.on{border-color:var(--ok)}
+.sc input[type=checkbox]{width:22px;height:22px;accent-color:#f26b21;flex:none}
+.sc .m{font-size:12px;color:var(--mut);margin-top:3px}
+.sc input[type=date],.info input,.info textarea{padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+.info{display:grid;gap:8px;margin-bottom:10px}
+.info input,.info textarea{width:100%}
+.x{border:0;background:none;color:var(--ink);font-size:22px;cursor:pointer}
+@media print{.steps,.tools,dialog{display:none}body{padding:0}.scroll{overflow:visible}}
+.tw{max-height:280px;overflow:auto;margin-top:10px}
+table.sm{width:100%;border-collapse:collapse;font-size:13px}
+.sm th,.sm td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.sm th:first-child,.sm td:first-child{text-align:left}
+.sm th{position:sticky;top:0;background:var(--card)}
+.pl{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;font-size:13px}
+.pl input{padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+#scsvg svg{width:100%;height:auto;display:block}
+.ln{display:inline-block;width:22px;border-top:3px solid var(--ok);vertical-align:middle;margin-right:4px}
+[hidden]{display:none!important}
+.tp{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.tp button{border:1px solid var(--acc);background:none;color:var(--acc);padding:5px 12px;border-radius:16px;cursor:pointer;font:inherit}
+</style></head><body>
+<h1>FSA Wall Panel Inspection Plan</h1>
+<p class="sub">Project CHB2A – Dolphin · Ref. drawing A-FSA-3000-2.1 (Building Elevations, Rev. R5 V7, Issued for Construction)</p>
+<div id="main">
+<div class="tp"><span>Total progress: <b id="tpv"></b></span><button id="rb">Progress report ›</button></div>
+<div class="card"><div class="stats" id="stats"></div></div>
+<div class="card">
+<h2>Inspection Sequence</h2>
+<div class="steps" id="steps"></div>
+<div class="legend"><span><i class="sq" style="background:#c62828"></i>Panel: waiting for support wall</span><span><i class="sq" style="background:#8d96a5"></i>Support wall checked</span><span><i class="sq" style="background:#f5c400"></i>Installation checked</span><span><i class="sq" style="background:#2f8fe0"></i>Finishing checked</span><span><i class="sq" style="background:#e6e9ee"></i>Column pending</span><span><i class="sq" style="background:var(--ok)"></i>Column checked</span><span>Dots: Support Wall · Installation · Finishing. Click a column to check the support wall, then a panel for the next steps.</span></div>
+<div class="tools"><button onclick="window.print()">Print</button><button id="rst">Reset all</button><button id="th">Toggle theme</button></div>
+</div>
+<div id="elevs"></div>
+<p class="note">Building shapes are schematic. Panels are divided by grid line (GL) span; columns sit at every panel joint and at the span ends. Columns represent the support wall: a panel’s support wall is confirmed automatically once the columns on both sides are checked. Areas beyond GL 3 on the North (left) and South (right) elevations are out of scope and not shown. Update panel and column positions to the final shop drawing if needed.</p>
+</div>
+<div id="rep" hidden><div class="tools" style="margin-bottom:12px"><button id="bk">‹ Back to inspection plan</button></div><h1 style="margin-bottom:12px">Progress Report</h1>
+<div class="card"><h2>Progress Summary</h2>
+<div class="steps" id="sumtabs"><button data-per="d">Daily</button><button data-per="w">Weekly</button><button data-per="m">Monthly</button><button data-per="y">Annual</button></div>
+<div id="sumbody"></div>
+<p class="note">Progress = checks completed ÷ total scope. Scope = Support Wall (columns) + Installation Wall Panel + Finishing, counted by their check dates. A panel’s support wall is not counted twice.</p></div>
+<div class="card"><h2>S-Curve (cumulative progress)</h2>
+<div class="pl"><label>Plan start <input type="date" id="ps"></label><label>Plan finish <input type="date" id="pf"></label></div>
+<div id="scsvg"></div>
+<div class="legend"><span><i class="ln"></i>Actual</span><span><i class="ln" style="border-top-style:dashed;border-color:#e0a100"></i>Plan (S-shaped, shown when plan start and finish are set)</span></div></div>
+</div>
+<dialog id="dlg"><div class="dh"><b id="dt"></b><button class="x" id="cl" aria-label="Close">×</button></div><div class="db" id="dbody"></div></dialog>
+<script>
+var STEPS=["1. Support Wall","2. Installation Wall Panel","3. Finishing"];
+var ELEVS=[
+{k:"N",t:"Elevation FSA – North : Grid Line E",gl:["3","2","1.3","1"],b:[["GL 3–2 · 10,650",2],["GL 2–1.3 · 14,000",3],["GL 1.3–1 · 10,000",2]],w:[10650,14000,10000]},
+{k:"S",t:"Elevation FSA – South : Grid Line A",gl:["1","1.3","2","3"],b:[["GL 1–1.3 · 10,000",2],["GL 1.3–2 · 14,000",3],["GL 2–3 · 10,850",2]],w:[10000,14000,10850]},
+{k:"W",t:"Elevation FSA – West",gl:["E","D","C","B","A"],b:[["GL E–D · 25,000",4],["GL D–C · 25,000",4],["GL C–B · 25,000",4],["GL B–A · 25,000",5]],w:[25000,25000,25000,25000]}];
+var key="chb2a-wallpanel-v3",S={},cur=3,M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+try{S=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){}
+function save(){try{localStorage.setItem(key,JSON.stringify(S))}catch(e){}}
+function g(id){return S[id]||(S[id]={c:{},t:{},i:{}})}
+function done(id,k){return !!(S[id]&&S[id].c[k])}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fmt(s){if(!s)return"";var p=s.split("-");return +p[2]+" "+M[+p[1]-1]+" "+p[0]}
+function pad(n){return String(n).padStart(2,"0")}
+function sum(a){return a.reduce(function(x,y){return x+y},0)}
+function all(){var P=[],C=[];ELEVS.forEach(function(e){var n=sum(e.b.map(function(b){return b[1]}));for(var i=1;i<=n;i++)P.push(e.k+"-"+pad(i));for(i=1;i<=n+1;i++)C.push("C-"+e.k+"-"+pad(i))});return{P:P,C:C}}
+function glb(e){var T=sum(e.w),x=0,r='<div class="glr">',l='<div class="gll">';for(var i=0;i<e.gl.length;i++){var p=(x/T*100).toFixed(3);r+='<div class="gb" style="left:'+p+'%">'+e.gl[i]+'</div>';l+='<i style="left:'+p+'%"></i>';x+=e.w[i]||0}return r+'</div>'+l+'</div>'}
+function sup(id){var n=+id.split("-")[1],k=id[0];return done("C-"+k+"-"+pad(n),"col")&&done("C-"+k+"-"+pad(n+1),"col")}
+function eff(id,s){if(!sup(id))return false;if(s==0)return true;var a=done(id,1);return s==1?a:a&&done(id,2)}
+function stage(id){return eff(id,2)?3:eff(id,1)?2:sup(id)?1:0}
+function render(){
+ var h="";
+ ELEVS.forEach(function(e){
+  var T=sum(e.w),x=0,n=1,c=1,cols="";
+  h+='<div class="card"><h2>'+e.t+'</h2><div class="scroll"><div class="elev"><div class="in">'+glb(e)+'<div class="bays">';
+  e.b.forEach(function(b,i){h+='<div class="bay" style="flex:'+e.w[i]+'">'+b[0]+'</div>'});
+  h+='</div><div class="roof"><span>Roof / parapet (not in scope)</span></div><div class="wall"><div class="row">';
+  e.b.forEach(function(b,i){
+   h+='<div class="pg" style="flex:'+e.w[i]+'">';
+   for(var j=0;j<b[1];j++){var id=e.k+"-"+pad(n++);
+    h+='<button class="p st'+stage(id)+(cur<3&&eff(id,cur)?" dim":"")+'" data-id="'+id+'"><span>'+id.split("-")[1]+'</span><span class="dots">';
+    for(var s=0;s<3;s++)h+='<i class="d s'+(eff(id,s)?2:0)+'"></i>';
+    h+='</span></button>'}
+   h+='</div>';
+   for(j=(i==0?0:1);j<=b[1];j++){var cid="C-"+e.k+"-"+pad(c++),ok=done(cid,"col");
+    cols+='<button class="col'+(ok?" ok":"")+'" data-col="'+cid+'" style="left:'+((x+e.w[i]*j/b[1])/T*100).toFixed(3)+'%" title="Support Wall · Column '+cid+(ok?" · checked "+fmt(S[cid].t.col):" · pending")+'"></button>'}
+   x+=e.w[i]});
+  h+='</div>'+cols+'</div><div class="gl">Finished floor level</div></div></div></div></div>'});
+ document.getElementById("elevs").innerHTML=h;
+ var A=all(),sh="";
+ STEPS.forEach(function(s,i){var k=0;A.P.forEach(function(id){if(eff(id,i))k++});
+  sh+='<div><b>'+s+'</b><div class="note">Checked '+k+' · Pending '+(A.P.length-k)+' (of '+A.P.length+' panels)</div><div class="bar"><i style="width:'+(k/A.P.length*100)+'%"></i></div></div>'});
+ var k=0;A.C.forEach(function(id){if(done(id,"col"))k++});
+ sh+='<div><b>Support Wall (columns)</b><div class="note">Checked '+k+' · Pending '+(A.C.length-k)+' (of '+A.C.length+' columns)</div><div class="bar"><i style="width:'+(k/A.C.length*100)+'%"></i></div></div>';
+ document.getElementById("stats").innerHTML=sh;
+ var b="";STEPS.forEach(function(s,i){b+='<button data-s="'+i+'" class="'+(cur==i?"on":"")+'">'+s+'</button>'});
+ b+='<button data-s="3" class="'+(cur==3?"on":"")+'">Show all</button>';
+ document.getElementById("steps").innerHTML=b;
+ sumr();chart();
+}
+function card(d,k,t,dis){var on=d.c[k],lk=dis&&!on;return '<div class="sc'+(on?" on":"")+'"><input type="checkbox" data-s="'+k+'"'+(on?" checked":"")+(lk?" disabled":"")+'><div><b>'+t+'</b>'+(lk?'<div class="m">Complete the previous step first</div>':'<div class="m">Checked date: <input type="date" data-dt="'+k+'" value="'+(d.t[k]||"")+'"'+(on?"":" disabled")+'></div>')+'</div></div>'}
+function fill(id,mode){
+ var d=g(id),bd=document.getElementById("dbody"),h="";
+ if(mode=="col"){h=card(d,"col","Support Wall");document.getElementById("dt").textContent="Support Wall – Column "+id}
+ else{h='<div class="info"><div><label>Inspector</label><input data-f="who" value="'+(d.i.who||"")+'"></div><div><label>Remarks / NCR reference</label><textarea rows="2" data-f="rem">'+(d.i.rem||"")+'</textarea></div></div>';
+  var n=+id.split("-")[1],q=id[0],L="C-"+q+"-"+pad(n),R="C-"+q+"-"+pad(n+1),sp=sup(id),ds=sp?(S[L].t.col>S[R].t.col?S[L].t.col:S[R].t.col):"";
+  var cs=function(c){return c+": "+(done(c,"col")?"checked "+fmt(S[c].t.col):"pending")};
+  h+='<div class="sc'+(sp?" on":"")+'"><input type="checkbox" disabled'+(sp?" checked":"")+'><div><b>'+STEPS[0]+'</b><div class="m">'+(sp?"Checked date: "+fmt(ds):"Waiting for support wall on both sides")+'</div><div class="m">Left '+cs(L)+" · Right "+cs(R)+'</div></div></div>';
+  h+=card(d,1,STEPS[1],!sp)+card(d,2,STEPS[2],!eff(id,1));
+  var el=ELEVS.filter(function(e){return e.k==id[0]})[0];document.getElementById("dt").textContent="Panel "+id+" – "+el.t}
+ bd.innerHTML=h;bd.dataset.id=id;bd.dataset.mode=mode;
+}
+function open(id,mode){fill(id,mode);document.getElementById("dlg").showModal()}
+document.addEventListener("click",function(e){
+ var p=e.target.closest(".p");if(p)open(p.dataset.id,"p");
+ var c=e.target.closest(".col");if(c)open(c.dataset.col,"col");
+ var s=e.target.closest("[data-s]");if(s&&s.tagName=="BUTTON"){cur=+s.dataset.s;render()}
+});
+var per="d";
+function recs(){var A=all(),R=[];A.C.forEach(function(c){if(done(c,"col"))R.push([S[c].t.col||today(),0])});A.P.forEach(function(id){if(eff(id,1))R.push([S[id].t[1]||today(),1]);if(eff(id,2))R.push([S[id].t[2]||today(),2])});return{R:R,T:A.C.length+2*A.P.length}}
+function dn(s){var p=s.split("-");return Math.floor(Date.UTC(+p[0],+p[1]-1,+p[2])/864e5)}
+function dd(n){return new Date(n*864e5).toISOString().slice(0,10)}
+function pk(n){if(per=="d")return dd(n);if(per=="w")return dd(n-(new Date(n*864e5).getUTCDay()+6)%7);if(per=="m")return dd(n).slice(0,7);return dd(n).slice(0,4)}
+function lab(k){if(per=="d")return fmt(k);if(per=="w")return "Week of "+fmt(k);if(per=="m"){var p=k.split("-");return M[+p[1]-1]+" "+p[0]}return k}
+function sumr(){
+ var o=recs(),R=o.R,T=o.T,G={},ks=[];
+ R.forEach(function(r){var k=pk(dn(r[0]));if(!G[k]){G[k]=[0,0,0];ks.push(k)}G[k][r[1]]++});
+ ks.sort();var cum=0,rows=[];
+ ks.forEach(function(k){var t=G[k][0]+G[k][1]+G[k][2];cum+=t;rows.push('<tr><td>'+lab(k)+'</td><td>'+G[k][0]+'</td><td>'+G[k][1]+'</td><td>'+G[k][2]+'</td><td>'+t+'</td><td>'+(t/T*100).toFixed(1)+'%</td><td>'+(cum/T*100).toFixed(1)+'%</td></tr>')});
+ var tk=pk(dn(today())),cp=G[tk]?G[tk][0]+G[tk][1]+G[tk][2]:0,nm={d:"day",w:"week",m:"month",y:"year"}[per];
+ var h='<div class="stats"><div><b>Overall progress</b><div class="note">'+R.length+' of '+T+' checks · '+(R.length/T*100).toFixed(1)+'%</div><div class="bar"><i style="width:'+(R.length/T*100)+'%"></i></div></div><div><b>This '+nm+'</b><div class="note">'+cp+' checks · '+(cp/T*100).toFixed(1)+'% of total scope</div></div></div>';
+ h+='<div class="tw"><table class="sm"><thead><tr><th>Period</th><th>Support Wall</th><th>Installation</th><th>Finishing</th><th>Checked</th><th>Period %</th><th>Cumulative %</th></tr></thead><tbody>'+(rows.length?rows.reverse().join(""):'<tr><td colspan="7">No checks recorded yet.</td></tr>')+'</tbody></table></div>';
+ document.getElementById("sumbody").innerHTML=h;
+ document.getElementById("tpv").textContent=R.length+" / "+T+" checks ("+(R.length/T*100).toFixed(1)+"%)";
+ document.querySelectorAll("[data-per]").forEach(function(b){b.classList.toggle("on",b.dataset.per==per)});
+}
+function chart(){
+ var o=recs(),R=o.R,T=o.T,pl=S._plan||{},tn=dn(today()),ds=R.map(function(r){return dn(r[0])});
+ var last=ds.length?Math.max.apply(null,ds):tn,a=ds.length?Math.min.apply(null,ds):tn,e=Math.max(tn,last);
+ var ps=pl.a?dn(pl.a):null,pf=pl.b?dn(pl.b):null;
+ if(ps!==null)a=Math.min(a,ps);if(pf!==null)e=Math.max(e,pf);
+ if(e-a<6)e=a+6;
+ var X=function(n){return 46+(n-a)/(e-a)*734},Y=function(v){return 262-v/100*248};
+ var cnt={};ds.forEach(function(n){cnt[n]=(cnt[n]||0)+1});
+ var c=0,pa="",n;for(n=a;n<=Math.max(tn,last);n++){c+=cnt[n]||0;pa+=(pa?"L":"M")+X(n).toFixed(1)+" "+Y(c/T*100).toFixed(1)}
+ var pp="";if(ps!==null&&pf!==null&&pf>ps)for(n=ps;n<=pf;n++){var t=(n-ps)/(pf-ps);pp+=(pp?"L":"M")+X(n).toFixed(1)+" "+Y(100*t*t*(3-2*t)).toFixed(1)}
+ var s='<svg viewBox="0 0 800 300" role="img" aria-label="S-curve of cumulative progress" font-family="inherit" font-size="11">';
+ [0,25,50,75,100].forEach(function(v){s+='<line x1="46" x2="780" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)"/><text x="40" y="'+(Y(v)+4)+'" text-anchor="end" fill="var(--mut)">'+v+'%</text>'});
+ for(var i=0;i<=4;i++){var m=Math.round(a+(e-a)*i/4);s+='<text x="'+X(m)+'" y="284" text-anchor="'+(i==0?"start":i==4?"end":"middle")+'" fill="var(--mut)">'+fmt(dd(m))+'</text>'}
+ if(tn>=a&&tn<=e)s+='<line x1="'+X(tn)+'" x2="'+X(tn)+'" y1="14" y2="262" stroke="var(--mut)" stroke-dasharray="3 3"/><text x="'+X(tn)+'" y="11" text-anchor="middle" fill="var(--mut)">Today</text>';
+ if(pp)s+='<path d="'+pp+'" fill="none" stroke="#e0a100" stroke-width="2.5" stroke-dasharray="6 4"/>';
+ s+='<path d="'+pa+'" fill="none" stroke="var(--ok)" stroke-width="3"/></svg>';
+ document.getElementById("scsvg").innerHTML=s;
+}
+document.addEventListener("click",function(e){var b=e.target.closest("[data-per]");if(b){per=b.dataset.per;sumr()}});
+document.getElementById("ps").onchange=function(){S._plan=S._plan||{};S._plan.a=this.value;save();chart()};
+document.getElementById("pf").onchange=function(){S._plan=S._plan||{};S._plan.b=this.value;save();chart()};
+(function(){var p=S._plan||{};document.getElementById("ps").value=p.a||"";document.getElementById("pf").value=p.b||""})();
+function go(r){document.getElementById("main").hidden=r;document.getElementById("rep").hidden=!r;try{location.hash=r?"report":""}catch(e){}window.scrollTo(0,0)}
+document.getElementById("rb").onclick=function(){go(true)};
+document.getElementById("bk").onclick=function(){go(false)};
+window.onhashchange=function(){go(location.hash=="#report")};
+if(location.hash=="#report")go(true);
+var bd=document.getElementById("dbody");
+bd.addEventListener("change",function(e){var id=bd.dataset.id,d=g(id),t=e.target;
+ if(t.dataset.s!==undefined){var k=t.dataset.s;if(t.checked){d.c[k]=1;if(!d.t[k])d.t[k]=today()}else{delete d.c[k];delete d.t[k]}}
+ else if(t.dataset.dt!==undefined)d.t[t.dataset.dt]=t.value||today();
+ else return;
+ save();render();fill(id,bd.dataset.mode)});
+bd.addEventListener("input",function(e){var t=e.target;if(t.dataset.f){g(bd.dataset.id).i[t.dataset.f]=t.value;save()}});
+document.getElementById("cl").onclick=function(){document.getElementById("dlg").close()};
+document.getElementById("rst").onclick=function(){if(confirm("Clear all inspection records?")){S={};save();document.getElementById("ps").value="";document.getElementById("pf").value="";render()}};
+document.getElementById("th").onclick=function(){var r=document.documentElement,d=r.dataset.theme;var dark=d?d=="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=dark?"light":"dark"};
+render();
+</script></body></html>
